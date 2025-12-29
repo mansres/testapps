@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emirates Auction - Quick Payment</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- HTML5 QR Code Scanner - Open Source Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        /* Scanner Section */
+        .scanner-section {
+            display: block;
+        }
+        
+        #reader {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .or-divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .or-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .or-divider span {
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Item Details Section */
+        .item-details-section {
+            display: none;
+        }
+        
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .item-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .item-code {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .item-details {
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .total-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .total-amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        /* Payment Section */
+        .payment-section {
+            display: none;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-method:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .payment-method.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .payment-method i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .payment-method span {
+            display: block;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .card-form {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+        
+        /* Success Section */
+        .success-section {
+            display: none;
+            text-align: center;
+            padding: 40px 30px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: successPulse 1s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .success-icon i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        .success-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .success-message {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .transaction-id {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .transaction-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .transaction-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .btn-scan {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-scan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-scan i {
+            font-size: 20px;
+        }
+        
+        #reader {
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .scanner-active {
+            border: 2px solid #667eea;
+            padding: 10px;
+            background: #f8f9fa;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Scanner Section -->
+        <div class="scanner-section" id="scannerSection">
+            <div class="header">
+                <h1>Quick Payment</h1>
+                <p>Scan or enter QR code</p>
+            </div>
+            
+            <div class="content">
+                <div id="reader" style="display: none;"></div>
+                
+                <button class="btn btn-scan" id="scanQRCode">
+                    <i class="fas fa-qrcode"></i> Scan QR Code
+                </button>
+                
+                <div class="or-divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="manualCode">Enter QR Code Manually</label>
+                    <input type="text" id="manualCode" placeholder="e.g., ABCDEFGH">
+                </div>
+                
+                <button class="btn" id="submitCode">
+                   Submit
+                </button>
+                
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+        
+        <!-- Item Details Section -->
+        <div class="item-details-section" id="itemDetailsSection">
+            <div class="header">
+                <h1>Item Details</h1>
+                <p>Review and confirm your purchase</p>
+            </div>
+            
+            <div class="content">
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-title" id="itemName">Loading...</div>
+                        <div class="item-code" id="itemCode">CODE</div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Description:</span>
+                            <span class="detail-value" id="itemDescription">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Unit Price:</span>
+                            <span class="detail-value" id="unitPrice">AED 0.00</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Quantity:</span>
+                            <span class="detail-value" id="quantity">1</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tax (5%):</span>
+                            <span class="detail-value" id="taxAmount">AED 0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="total-section">
+                    <div class="total-label">Total Amount</div>
+                    <div class="total-amount" id="totalAmount">AED 0.00</div>
+                </div>
+                
+                <button class="btn" id="proceedToPayment">
+                    <i class="fas fa-credit-card"></i> Proceed to Payment
+                </button>
+                
+                <button class="btn btn-secondary" id="scanAnother">
+                    <i class="fas fa-arrow-left"></i> Scan Another Item
+                </button>
+            </div>
+        </div>
+        
+        <!-- Payment Section -->
+        <div class="payment-section" id="paymentSection">
+            <div class="header">
+                <h1>Payment</h1>
+                <p>Choose your payment method</p>
+            </div>
+            
+            <div class="content">
+                <div class="total-section">
+                    <div class="total-label">Amount to Pay</div>
+                    <div class="total-amount" id="paymentAmount">AED 0.00</div>
+                </div>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" data-method="card">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Credit/Debit Card</span>
+                    </div>
+                    <div class="payment-method" data-method="wallet">
+                        <i class="fas fa-wallet"></i>
+                        <span>Digital Wallet</span>
+                    </div>
+                    <div class="payment-method" data-method="bank">
+                        <i class="fas fa-university"></i>
+                        <span>Bank Transfer</span>
+                    </div>
+                    <div class="payment-method" data-method="cash">
+                        <i class="fas fa-money-bill"></i>
+                        <span>Cash on Delivery</span>
+                    </div>
+                </div>
+                
+                <div class="card-form" id="cardForm">
+                    <div class="input-group">
+                        <label for="cardNumber">Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="cardName">Cardholder Name</label>
+                            <input type="text" id="cardName" placeholder="John Doe">
+                        </div>
+                        <div class="input-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="3">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="expiryMonth">Expiry Month</label>
+                            <input type="text" id="expiryMonth" placeholder="MM" maxlength="2">
+                        </div>
+                        <div class="input-group">
+                            <label for="expiryYear">Expiry Year</label>
+                            <input type="text" id="expiryYear" placeholder="YY" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn" id="confirmPayment">
+                    <i class="fas fa-lock"></i> Confirm Payment
+                </button>
+                
+                <button class="btn btn-secondary" id="backToDetails">
+                    <i class="fas fa-arrow-left"></i> Back to Details
+                </button>
+                
+                <div class="loading" id="paymentLoading">
+                    <div class="spinner"></div>
+                    <p>Processing payment...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success Section -->
+        <div class="success-section" id="successSection">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <h2 class="success-title">Payment Successful!</h2>
+            <p class="success-message">Your payment has been processed successfully.</p>
+            
+            <div class="transaction-id">
+                <div class="transaction-label">Transaction ID</div>
+                <div class="transaction-number" id="transactionId">TXN-2024-XXXXXX</div>
+            </div>
+            
+            <div class="item-card">
+                <div class="detail-row">
+                    <span class="detail-label">Item:</span>
+                    <span class="detail-value" id="successItemName">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount Paid:</span>
+                    <span class="detail-value" id="successAmount">AED 0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value" id="successDate">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value" id="successMethod">-</span>
+                </div>
+            </div>
+            
+            <button class="btn" id="downloadReceipt">
+                <i class="fas fa-download"></i> Download Receipt
+            </button>
+            
+            <button class="btn btn-secondary" id="newTransaction">
+                <i class="fas fa-plus"></i> New Transaction
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            let html5QrcodeScanner = null;
+            let currentItem = null;
+            let selectedPaymentMethod = null;
+            let isScanning = false;
+            
+            // Sample item database (in production, this would come from your backend)
+            const itemDatabase = {
+                'ITEM-2024-001': {
+                    name: 'Vehicle Inspection Service',
+                    description: 'Comprehensive vehicle inspection',
+                    price: 500.00,
+                    quantity: 1
+                },
+                'ITEM-2024-002': {
+                    name: 'Registration Renewal',
+                    description: 'Annual vehicle registration renewal',
+                    price: 350.00,
+                    quantity: 1
+                },
+                'ITEM-2024-003': {
+                    name: 'Auction Entry Fee',
+                    description: 'Vehicle auction listing fee',
+                    price: 150.00,
+                    quantity: 1
+                },
+                'VEHICLE-AUC-2024': {
+                    name: 'Premium Vehicle Package',
+                    description: 'Full service package with priority listing',
+                    price: 1200.00,
+                    quantity: 1
+                },
+                'SERVICE-PKG-001': {
+                    name: 'Recovery Charge',
+                    description: 'Light Vehicle recovery charge fee',
+                    price: 500.00,
+                    quantity: 1
+                }
+            };
+            
+            // Initialize QR Scanner
+            function initializeScanner() {
+                if (!html5QrcodeScanner) {
+                    html5QrcodeScanner = new Html5Qrcode("reader");
+                }
+            }
+            
+            // Start scanning
+            function startScanning() {
+                if (isScanning) return;
+                
+                // Show the reader div
+                $('#reader').show().addClass('scanner-active');
+                $('#scanQRCode').html('<i class="fas fa-spinner fa-spin"></i> Scanning...').prop('disabled', true);
+                
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                };
+                
+                isScanning = true;
+                
+                html5QrcodeScanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanError
+                ).catch((err) => {
+                    console.error(`Unable to start scanning: ${err}`);
+                    showError("Camera access denied. Please enter code manually.");
+                    resetScanButton();
+                });
+            }
+            
+            // Stop scanning
+            function stopScanning() {
+                if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+                    html5QrcodeScanner.stop().then(() => {
+                        console.log("QR Code scanning stopped.");
+                        $('#reader').hide().removeClass('scanner-active');
+                        resetScanButton();
+                        isScanning = false;
+                    }).catch((err) => {
+                        console.error(`Unable to stop scanning: ${err}`);
+                        isScanning = false;
+                    });
+                } else {
+                    $('#reader').hide().removeClass('scanner-active');
+                    resetScanButton();
+                    isScanning = false;
+                }
+            }
+            
+            // Reset scan button
+            function resetScanButton() {
+                $('#scanQRCode').html('<i class="fas fa-qrcode"></i> Scan QR Code').prop('disabled', false);
+            }
+            
+            // Handle successful scan
+            function onScanSuccess(decodedText, decodedResult) {
+                // Immediately stop scanning after successful scan
+                stopScanning();
+                $('#manualCode').val(decodedText);
+                lookupItem(decodedText);
+            }
+            
+            // Handle scan error (silent, just for debugging)
+            function onScanError(errorMessage) {
+                // Silent error handling - scanning continues
+            }
+            
+            // Lookup item by code
+            function lookupItem(code) {
+                hideError();
+                
+                // Simulate API call delay
+                setTimeout(() => {
+                    const item = itemDatabase[code];
+                    
+                    if (item) {
+                        currentItem = {
+                            code: code,
+                            ...item
+                        };
+                        showItemDetails();
+                    } else {
+                        showError("Item not found. Please check the code and try again.");
+                    }
+                }, 500);
+            }
+            
+            // Show item details
+            function showItemDetails() {
+                const tax = currentItem.price * 0.05;
+                const total = currentItem.price + tax;
+                
+                $('#itemName').text(currentItem.name);
+                $('#itemCode').text(currentItem.code);
+                $('#itemDescription').text(currentItem.description);
+                $('#unitPrice').text(`AED ${currentItem.price.toFixed(2)}`);
+                $('#quantity').text(currentItem.quantity);
+                $('#taxAmount').text(`AED ${tax.toFixed(2)}`);
+                $('#totalAmount').text(`AED ${total.toFixed(2)}`);
+                
+                currentItem.tax = tax;
+                currentItem.total = total;
+                
+                $('#scannerSection').hide();
+                $('#itemDetailsSection').fadeIn();
+            }
+            
+            // Show payment section
+            function showPaymentSection() {
+                $('#paymentAmount').text(`AED ${currentItem.total.toFixed(2)}`);
+                $('#itemDetailsSection').hide();
+                $('#paymentSection').fadeIn();
+            }
+            
+            // Process payment
+            function processPayment() {
+                if (!selectedPaymentMethod) {
+                    alert('Please select a payment method');
+                    return;
+                }
+                
+                if (selectedPaymentMethod === 'card') {
+                    // Validate card form
+                    const cardNumber = $('#cardNumber').val().replace(/\s/g, '');
+                    const cardName = $('#cardName').val();
+                    const cvv = $('#cvv').val();
+                    const expiryMonth = $('#expiryMonth').val();
+                    const expiryYear = $('#expiryYear').val();
+                    
+                    if (!cardNumber || cardNumber.length < 16) {
+                        alert('Please enter a valid card number');
+                        return;
+                    }
+                    
+                    if (!cardName) {
+                        alert('Please enter cardholder name');
+                        return;
+                    }
+                    
+                    if (!cvv || cvv.length < 3) {
+                        alert('Please enter CVV');
+                        return;
+                    }
+                    
+                    if (!expiryMonth || !expiryYear) {
+                        alert('Please enter expiry date');
+                        return;
+                    }
+                }
+                
+                $('#paymentLoading').show();
+                $('#confirmPayment').prop('disabled', true);
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    $('#paymentLoading').hide();
+                    showSuccessScreen();
+                }, 2000);
+            }
+            
+            // Show success screen
+            function showSuccessScreen() {
+                const transactionId = 'TXN-' + new Date().getFullYear() + '-' + 
+                                    Math.random().toString(36).substr(2, 6).toUpperCase();
+                const currentDate = new Date().toLocaleString();
+                const methodNames = {
+                    'card': 'Credit/Debit Card',
+                    'wallet': 'Digital Wallet',
+                    'bank': 'Bank Transfer',
+                    'cash': 'Cash on Delivery'
+                };
+                
+                $('#transactionId').text(transactionId);
+                $('#successItemName').text(currentItem.name);
+                $('#successAmount').text(`AED ${currentItem.total.toFixed(2)}`);
+                $('#successDate').text(currentDate);
+                $('#successMethod').text(methodNames[selectedPaymentMethod]);
+                
+                $('#paymentSection').hide();
+                $('#successSection').fadeIn();
+            }
+            
+            // Show error message
+            function showError(message) {
+                $('#errorMessage').text(message).fadeIn();
+            }
+            
+            // Hide error message
+            function hideError() {
+                $('#errorMessage').fadeOut();
+            }
+            
+            // Event Handlers
+            
+            // Scan QR Code button
+            $('#scanQRCode').click(function() {
+                hideError();
+                if (!html5QrcodeScanner) {
+                    initializeScanner();
+                }
+                startScanning();
+            });
+            
+            // Manual code submission
+            $('#submitCode').click(function() {
+                const code = $('#manualCode').val().trim();
+                if (code) {
+                    lookupItem(code);
+                } else {
+                    showError("Please enter an item code");
+                }
+            });
+            
+            // Enter key on manual code input
+            $('#manualCode').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#submitCode').click();
+                }
+            });
+            
+            // Proceed to payment
+            $('#proceedToPayment').click(function() {
+                showPaymentSection();
+            });
+            
+            // Scan another item
+            $('#scanAnother').click(function() {
+                $('#itemDetailsSection').hide();
+                $('#scannerSection').fadeIn();
+                $('#manualCode').val('');
+                currentItem = null;
+                // Stop any ongoing scanning when returning to scanner section
+                if (isScanning) {
+                    stopScanning();
+                }
+            });
+            
+            // Payment method selection
+            $('.payment-method').click(function() {
+                $('.payment-method').removeClass('selected');
+                $(this).addClass('selected');
+                selectedPaymentMethod = $(this).data('method');
+                
+                if (selectedPaymentMethod === 'card') {
+                    $('#cardForm').slideDown();
+                } else {
+                    $('#cardForm').slideUp();
+                }
+            });
+            
+            // Format card number input
+            $('#cardNumber').on('input', function() {
+                let value = $(this).val().replace(/\s/g, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                $(this).val(formattedValue);
+            });
+            
+            // Only allow numbers for card fields
+            $('#cardNumber, #cvv, #expiryMonth, #expiryYear').on('input', function() {
+                let value = $(this).val();
+                if (this.id === 'cardNumber') {
+                    value = value.replace(/[^\d\s]/g, '');
+                } else {
+                    value = value.replace(/\D/g, '');
+                }
+                $(this).val(value);
+            });
+            
+            // Confirm payment
+            $('#confirmPayment').click(function() {
+                processPayment();
+            });
+            
+            // Back to details
+            $('#backToDetails').click(function() {
+                $('#paymentSection').hide();
+                $('#itemDetailsSection').fadeIn();
+                selectedPaymentMethod = null;
+                $('.payment-method').removeClass('selected');
+                $('#cardForm').hide();
+            });
+            
+            // Download receipt (mock)
+            $('#downloadReceipt').click(function() {
+                const receiptData = {
+                    transactionId: $('#transactionId').text(),
+                    item: currentItem.name,
+                    amount: currentItem.total,
+                    date: $('#successDate').text()
+                };
+                
+                alert('Receipt download initiated\n\n' + JSON.stringify(receiptData, null, 2));
+            });
+            
+            // New transaction
+            $('#newTransaction').click(function() {
+                // Reset everything
+                currentItem = null;
+                selectedPaymentMethod = null;
+                $('#manualCode').val('');
+                $('.payment-method').removeClass('selected');
+                $('#cardForm').hide();
+                $('#cardNumber, #cardName, #cvv, #expiryMonth, #expiryYear').val('');
+                $('#confirmPayment').prop('disabled', false);
+                
+                // Stop any ongoing scanning
+                if (isScanning) {
+                    stopScanning();
+                }
+                
+                $('#successSection').hide();
+                $('#scannerSection').fadeIn();
+            });
+            
+            // Initialize scanner on page load (but don't start scanning)
+            initializeScanner();
+        });
+    </script>
+</body>
+</html>
