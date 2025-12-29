@@ -14,6 +14,9 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- SweetAlert2 - Professional Alert/Notification Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         * {
             margin: 0;
@@ -497,6 +500,139 @@
             }
             100% {
                 box-shadow: 0 0 0 0 rgba(190, 30, 45, 0);
+            }
+        }
+        
+        /* SweetAlert2 Custom Styling */
+        .swal-popup {
+            border-radius: 12px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        }
+        
+        .swal-title {
+            color: #231F20 !important;
+            font-weight: 600 !important;
+            font-size: 22px !important;
+        }
+        
+        .swal-content {
+            color: #6c757d !important;
+            font-size: 15px !important;
+        }
+        
+        .swal-html {
+            color: #231F20 !important;
+        }
+        
+        .swal2-confirm {
+            background-color: #BE1E2D !important;
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .swal2-confirm:hover {
+            background-color: #a01a26 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(190, 30, 45, 0.3) !important;
+        }
+        
+        .swal2-icon {
+            margin: 20px auto 15px !important;
+        }
+        
+        .swal2-icon.swal2-error {
+            border-color: #BE1E2D !important;
+            color: #BE1E2D !important;
+        }
+        
+        .swal2-icon.swal2-error [class^=swal2-x-line] {
+            background-color: #BE1E2D !important;
+        }
+        
+        .swal2-icon.swal2-warning {
+            border-color: #ffc107 !important;
+            color: #ffc107 !important;
+        }
+        
+        .swal2-icon.swal2-success {
+            border-color: #BE1E2D !important;
+            color: #BE1E2D !important;
+        }
+        
+        .swal2-icon.swal2-success [class^=swal2-success-line] {
+            background-color: #BE1E2D !important;
+        }
+        
+        .swal2-icon.swal2-success .swal2-success-ring {
+            border-color: rgba(190, 30, 45, 0.3) !important;
+        }
+        
+        /* SweetAlert2 Toast Styling */
+        .swal-toast {
+            border-radius: 8px !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+            padding: 12px 16px !important;
+            min-width: 300px !important;
+            max-width: 90% !important;
+        }
+        
+        .swal-toast-title {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            margin-bottom: 4px !important;
+        }
+        
+        .swal-toast-content {
+            font-size: 14px !important;
+        }
+        
+        /* Mobile responsive for SweetAlert2 */
+        @media (max-width: 480px) {
+            .swal-popup {
+                width: 90% !important;
+                margin: 20px auto !important;
+            }
+            
+            .swal-title {
+                font-size: 18px !important;
+            }
+            
+            .swal-content {
+                font-size: 14px !important;
+            }
+            
+            .swal2-confirm {
+                padding: 12px 20px !important;
+                font-size: 14px !important;
+            }
+            
+            .swal-toast {
+                min-width: 280px !important;
+                max-width: 95% !important;
+                padding: 10px 14px !important;
+            }
+            
+            .swal-toast-title {
+                font-size: 15px !important;
+            }
+            
+            .swal-toast-content {
+                font-size: 13px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .swal-toast {
+                position: fixed !important;
+                top: 20px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+                max-width: calc(100% - 20px) !important;
             }
         }
         
@@ -1040,7 +1176,18 @@
             // Process payment
             function processPayment() {
                 if (!selectedPaymentMethod) {
-                    alert('Please select a payment method');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Payment Method Required',
+                        text: 'Please select a payment method to continue',
+                        confirmButtonColor: '#BE1E2D',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'swal-popup',
+                            title: 'swal-title',
+                            content: 'swal-content'
+                        }
+                    });
                     return;
                 }
                 
@@ -1053,22 +1200,66 @@
                     const expiryYear = $('#expiryYear').val();
                     
                     if (!cardNumber || cardNumber.length < 16) {
-                        alert('Please enter a valid card number');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Card Number',
+                            text: 'Please enter a valid 16-digit card number',
+                            confirmButtonColor: '#BE1E2D',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'swal-popup',
+                                title: 'swal-title',
+                                content: 'swal-content'
+                            }
+                        });
                         return;
                     }
                     
                     if (!cardName) {
-                        alert('Please enter cardholder name');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Cardholder Name Required',
+                            text: 'Please enter the cardholder name',
+                            confirmButtonColor: '#BE1E2D',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'swal-popup',
+                                title: 'swal-title',
+                                content: 'swal-content'
+                            }
+                        });
                         return;
                     }
                     
                     if (!cvv || cvv.length < 3) {
-                        alert('Please enter CVV');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'CVV Required',
+                            text: 'Please enter the 3-digit CVV code',
+                            confirmButtonColor: '#BE1E2D',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'swal-popup',
+                                title: 'swal-title',
+                                content: 'swal-content'
+                            }
+                        });
                         return;
                     }
                     
                     if (!expiryMonth || !expiryYear) {
-                        alert('Please enter expiry date');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Expiry Date Required',
+                            text: 'Please enter the card expiry date',
+                            confirmButtonColor: '#BE1E2D',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'swal-popup',
+                                title: 'swal-title',
+                                content: 'swal-content'
+                            }
+                        });
                         return;
                     }
                 }
@@ -1105,9 +1296,29 @@
                 $('#successSection').fadeIn();
             }
             
-            // Show error message
+            // Show error message using SweetAlert2 Toast
             function showError(message) {
-                $('#errorMessage').text(message).fadeIn();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    },
+                    customClass: {
+                        popup: 'swal-toast',
+                        title: 'swal-toast-title',
+                        content: 'swal-toast-content'
+                    }
+                });
+                // Also hide the old error message div if it exists
+                $('#errorMessage').fadeOut();
             }
             
             // Hide error message
@@ -1214,7 +1425,28 @@
                     date: $('#successDate').text()
                 };
                 
-                alert('Receipt download initiated\n\n' + JSON.stringify(receiptData, null, 2));
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Receipt Download',
+                    html: `
+                        <div style="text-align: left; margin-top: 15px;">
+                            <p><strong>Transaction ID:</strong> ${receiptData.transactionId}</p>
+                            <p><strong>Item:</strong> ${receiptData.item}</p>
+                            <p><strong>Amount:</strong> AED ${receiptData.amount.toFixed(2)}</p>
+                            <p><strong>Date:</strong> ${receiptData.date}</p>
+                        </div>
+                        <p style="margin-top: 20px; color: #6c757d; font-size: 14px;">Receipt download has been initiated.</p>
+                    `,
+                    confirmButtonColor: '#BE1E2D',
+                    confirmButtonText: 'OK',
+                    width: '90%',
+                    customClass: {
+                        popup: 'swal-popup',
+                        title: 'swal-title',
+                        content: 'swal-content',
+                        htmlContainer: 'swal-html'
+                    }
+                });
             });
             
             // New transaction
